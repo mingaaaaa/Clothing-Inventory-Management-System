@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  WAREHOUSE_STAFF
+  STORE_MANAGER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  username     String     @unique
+  passwordHash String     @map("password_hash")
+  realName     String?    @map("real_name")
+  phone        String?
+  role         UserRole   @default(WAREHOUSE_STAFF)
+  status       UserStatus @default(ACTIVE)
+  storeId      Int?       @map("store_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  store        Store?          @relation(fields: [storeId], references: [id])
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int      @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  isRevoked Boolean  @default(false) @map("is_revoked")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model Menu {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  label     String
+  path      String
+  icon      String?
+  sort      Int      @default(0)
+  parentId  Int?     @map("parent_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  parent    Menu?    @relation("MenuHierarchy", fields: [parentId], references: [id])
+  children  Menu[]   @relation("MenuHierarchy")
+  roles     RoleMenu[]
+
+  @@map("menus")
+}
+
+model RoleMenu {
+  id     Int      @id @default(autoincrement())
+  role   UserRole
+  menuId Int      @map("menu_id")
+
+  menu   Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  @@unique([role, menuId])
+  @@map("role_menus")
+}
+
+model Store {
+  id        Int      @id @default(autoincrement())
+  name      String
+  address   String?
+  latitude  Float?
+  longitude Float?
+  phone     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  users     User[]
+
+  @@map("stores")
+}
