@@ -9,7 +9,7 @@
 
 - NestJS 11
 - Prisma
-- SQLite（开发环境）
+- PostgreSQL
 - JWT + Passport
 - `@clothing-inventory/shared`
 

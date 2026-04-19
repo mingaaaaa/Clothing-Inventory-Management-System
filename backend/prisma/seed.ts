@@ -65,11 +65,25 @@ async function main() {
     where: { id: 1 },
     update: {},
     create: {
-      name: '示例门店',
-      address: '上海市南京路100号',
+      name: '示例门店 - 南京路旗舰店',
+      code: 'STORE-001',
+      type: 'DIRECT',
+      status: 'ACTIVE',
+      country: '中国',
+      province: '上海市',
+      city: '上海市',
+      district: '黄浦区',
+      address: '南京路100号',
       latitude: 31.2304,
       longitude: 121.4737,
-      phone: '021-12345678',
+      contactName: '张经理',
+      contactPhone: '021-12345678',
+      openTime: '09:00-22:00',
+      openDate: new Date('2024-01-15'),
+      area: 350.5,
+      employeeCount: 12,
+      remark: '旗舰展示店',
+      rentCost: 80000,
     },
   });
 
@@ -85,6 +99,12 @@ async function main() {
       status: 'ACTIVE',
       storeId: store.id,
     },
+  });
+
+  // Update store manager relation
+  await prisma.store.update({
+    where: { id: store.id },
+    data: { managerId: 3, managerName: '门店经理' },
   });
 
   console.log('Seed completed!');
