@@ -56,7 +56,7 @@ export interface StoreItem {
 /** 创建门店请求 */
 export interface CreateStoreRequest {
   name: string;
-  code: string;
+  code?: string;
   type: StoreType;
   status?: StoreStatus;
   country?: string;

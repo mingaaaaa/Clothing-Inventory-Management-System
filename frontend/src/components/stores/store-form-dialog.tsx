@@ -3,11 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useStoreStore } from '@/stores/store-store';
 import { StoreType, StoreStatus, STORE_TYPE_LABELS, STORE_STATUS_LABELS, type StoreItem } from '@clothing-inventory/shared';
-import { X, Loader2 } from 'lucide-react';
+import { Loader2, Info, MapPin, Phone, Clock, Building2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { TimeRangePicker } from '@/components/ui/time-range-picker';
 
 interface FormData {
   name: string;
-  code: string;
   type: StoreType;
   status: StoreStatus;
   country: string;
@@ -31,7 +37,6 @@ interface FormData {
 
 const initialFormData: FormData = {
   name: '',
-  code: '',
   type: StoreType.DIRECT,
   status: StoreStatus.ACTIVE,
   country: '',
@@ -56,7 +61,6 @@ const initialFormData: FormData = {
 function storeToFormData(store: StoreItem): FormData {
   return {
     name: store.name,
-    code: store.code,
     type: store.type,
     status: store.status,
     country: store.country || '',
@@ -77,6 +81,17 @@ function storeToFormData(store: StoreItem): FormData {
     remark: store.remark || '',
     rentCost: store.rentCost?.toString() || '',
   };
+}
+
+function SectionHeader({ icon: Icon, title }: { icon: React.ComponentType<{ className?: string }>; title: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
+        <Icon className="h-3.5 w-3.5 text-primary" />
+      </div>
+      <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h4>
+    </div>
+  );
 }
 
 export function StoreFormDialog() {
@@ -108,7 +123,6 @@ export function StoreFormDialog() {
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
     if (!form.name.trim()) newErrors.name = '请输入门店名称';
-    if (!form.code.trim()) newErrors.code = '请输入门店编码';
     if (!form.province.trim()) newErrors.province = '请输入省份';
     if (!form.city.trim()) newErrors.city = '请输入城市';
     if (!form.district.trim()) newErrors.district = '请输入区县';
@@ -124,7 +138,6 @@ export function StoreFormDialog() {
     try {
       const payload = {
         name: form.name.trim(),
-        code: form.code.trim(),
         type: form.type as StoreType,
         status: form.status as StoreStatus,
         country: form.country.trim() || undefined,
@@ -156,179 +169,177 @@ export function StoreFormDialog() {
     }
   };
 
-  if (!formOpen) return null;
-
-  const inputCls =
-    'w-full rounded-lg border border-[#e0ddd8] bg-white px-4 py-2.5 text-sm outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10';
-  const labelCls = 'mb-1.5 block text-sm font-medium text-[#333]';
-  const errorCls = 'mt-1 text-xs text-red-500';
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={closeForm}>
-      <div
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-[#1a1a2e]">
-            {isEdit ? '编辑门店' : '新增门店'}
-          </h3>
-          <button onClick={closeForm} className="rounded-lg p-1 text-[#999] hover:bg-[#f0f0f0]">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+    <Dialog open={formOpen} onOpenChange={(open) => !open && closeForm()}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl">
+        {/* Header accent */}
+        <div className="absolute top-0 left-0 right-0 h-1 gradient-accent-bar rounded-t-2xl" />
+        <DialogHeader className="pt-2">
+          <DialogTitle className="text-lg">{isEdit ? '编辑门店' : '新增门店'}</DialogTitle>
+        </DialogHeader>
 
         {/* 基本信息 */}
-        <div className="mb-6">
-          <h4 className="mb-3 text-sm font-semibold text-[#1a1a2e]">基本信息</h4>
-          <div className="grid grid-cols-2 gap-4">
+        <div className="rounded-xl bg-muted/20 p-4">
+          <SectionHeader icon={Info} title="基本信息" />
+          <div className="grid grid-cols-3 gap-3">
+            {isEdit && editingStore && (
+              <div>
+                <Label className="text-xs">门店编码</Label>
+                <div className="mt-1 text-sm font-mono font-medium text-muted-foreground bg-muted/60 rounded-lg px-3 py-2">
+                  {editingStore.code}
+                </div>
+              </div>
+            )}
             <div>
-              <label className={labelCls}>门店名称 *</label>
-              <input className={inputCls} value={form.name} onChange={(e) => updateField('name', e.target.value)} />
-              {errors.name && <p className={errorCls}>{errors.name}</p>}
+              <Label className="text-xs">门店名称 *</Label>
+              <Input className="mt-1 rounded-lg" value={form.name} onChange={(e) => updateField('name', e.target.value)} />
+              {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
             </div>
             <div>
-              <label className={labelCls}>门店编码 *</label>
-              <input className={inputCls} value={form.code} onChange={(e) => updateField('code', e.target.value)} disabled={isEdit} />
-              {errors.code && <p className={errorCls}>{errors.code}</p>}
+              <Label className="text-xs">门店类型</Label>
+              <Select value={form.type} onValueChange={(v) => updateField('type', v)}>
+                <SelectTrigger className="mt-1 rounded-lg">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(STORE_TYPE_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
-              <label className={labelCls}>门店类型</label>
-              <select className={inputCls} value={form.type} onChange={(e) => updateField('type', e.target.value)}>
-                {Object.entries(STORE_TYPE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}>状态</label>
-              <select className={inputCls} value={form.status} onChange={(e) => updateField('status', e.target.value)}>
-                {Object.entries(STORE_STATUS_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
+              <Label className="text-xs">状态</Label>
+              <Select value={form.status} onValueChange={(v) => updateField('status', v)}>
+                <SelectTrigger className="mt-1 rounded-lg">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(STORE_STATUS_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
 
         {/* 地址信息 */}
-        <div className="mb-6">
-          <h4 className="mb-3 text-sm font-semibold text-[#1a1a2e]">地址信息</h4>
-          <div className="grid grid-cols-2 gap-4">
+        <div className="rounded-xl bg-muted/20 p-4">
+          <SectionHeader icon={MapPin} title="地址信息" />
+          <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className={labelCls}>省份 *</label>
-              <input className={inputCls} value={form.province} onChange={(e) => updateField('province', e.target.value)} />
-              {errors.province && <p className={errorCls}>{errors.province}</p>}
+              <Label className="text-xs">省份 *</Label>
+              <Input className="mt-1 rounded-lg" value={form.province} onChange={(e) => updateField('province', e.target.value)} />
+              {errors.province && <p className="mt-1 text-xs text-destructive">{errors.province}</p>}
             </div>
             <div>
-              <label className={labelCls}>城市 *</label>
-              <input className={inputCls} value={form.city} onChange={(e) => updateField('city', e.target.value)} />
-              {errors.city && <p className={errorCls}>{errors.city}</p>}
+              <Label className="text-xs">城市 *</Label>
+              <Input className="mt-1 rounded-lg" value={form.city} onChange={(e) => updateField('city', e.target.value)} />
+              {errors.city && <p className="mt-1 text-xs text-destructive">{errors.city}</p>}
             </div>
             <div>
-              <label className={labelCls}>区县 *</label>
-              <input className={inputCls} value={form.district} onChange={(e) => updateField('district', e.target.value)} />
-              {errors.district && <p className={errorCls}>{errors.district}</p>}
+              <Label className="text-xs">区县 *</Label>
+              <Input className="mt-1 rounded-lg" value={form.district} onChange={(e) => updateField('district', e.target.value)} />
+              {errors.district && <p className="mt-1 text-xs text-destructive">{errors.district}</p>}
             </div>
             <div>
-              <label className={labelCls}>国家</label>
-              <input className={inputCls} value={form.country} onChange={(e) => updateField('country', e.target.value)} />
+              <Label className="text-xs">国家</Label>
+              <Input className="mt-1 rounded-lg" value={form.country} onChange={(e) => updateField('country', e.target.value)} />
             </div>
             <div className="col-span-2">
-              <label className={labelCls}>详细地址 *</label>
-              <input className={inputCls} value={form.address} onChange={(e) => updateField('address', e.target.value)} />
-              {errors.address && <p className={errorCls}>{errors.address}</p>}
+              <Label className="text-xs">详细地址 *</Label>
+              <Input className="mt-1 rounded-lg" value={form.address} onChange={(e) => updateField('address', e.target.value)} />
+              {errors.address && <p className="mt-1 text-xs text-destructive">{errors.address}</p>}
             </div>
             <div>
-              <label className={labelCls}>经度</label>
-              <input type="number" step="any" className={inputCls} value={form.longitude} onChange={(e) => updateField('longitude', e.target.value)} />
+              <Label className="text-xs">经度</Label>
+              <Input type="number" step="any" className="mt-1 rounded-lg" value={form.longitude} onChange={(e) => updateField('longitude', e.target.value)} />
             </div>
             <div>
-              <label className={labelCls}>纬度</label>
-              <input type="number" step="any" className={inputCls} value={form.latitude} onChange={(e) => updateField('latitude', e.target.value)} />
+              <Label className="text-xs">纬度</Label>
+              <Input type="number" step="any" className="mt-1 rounded-lg" value={form.latitude} onChange={(e) => updateField('latitude', e.target.value)} />
             </div>
           </div>
         </div>
 
         {/* 联系信息 */}
-        <div className="mb-6">
-          <h4 className="mb-3 text-sm font-semibold text-[#1a1a2e]">联系信息</h4>
-          <div className="grid grid-cols-2 gap-4">
+        <div className="rounded-xl bg-muted/20 p-4">
+          <SectionHeader icon={Phone} title="联系信息" />
+          <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className={labelCls}>联系人</label>
-              <input className={inputCls} value={form.contactName} onChange={(e) => updateField('contactName', e.target.value)} />
+              <Label className="text-xs">联系人</Label>
+              <Input className="mt-1 rounded-lg" value={form.contactName} onChange={(e) => updateField('contactName', e.target.value)} />
             </div>
             <div>
-              <label className={labelCls}>联系电话</label>
-              <input className={inputCls} value={form.contactPhone} onChange={(e) => updateField('contactPhone', e.target.value)} />
+              <Label className="text-xs">联系电话</Label>
+              <Input className="mt-1 rounded-lg" value={form.contactPhone} onChange={(e) => updateField('contactPhone', e.target.value)} />
             </div>
           </div>
         </div>
 
         {/* 运营信息 */}
-        <div className="mb-6">
-          <h4 className="mb-3 text-sm font-semibold text-[#1a1a2e]">运营信息</h4>
-          <div className="grid grid-cols-2 gap-4">
+        <div className="rounded-xl bg-muted/20 p-4">
+          <SectionHeader icon={Clock} title="运营信息" />
+          <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className={labelCls}>营业时间</label>
-              <input className={inputCls} placeholder="例如 09:00-22:00" value={form.openTime} onChange={(e) => updateField('openTime', e.target.value)} />
+              <Label className="text-xs">营业时间</Label>
+              <div className="mt-1">
+                <TimeRangePicker value={form.openTime} onChange={(v) => updateField('openTime', v)} />
+              </div>
             </div>
             <div>
-              <label className={labelCls}>开店日期</label>
-              <input type="date" className={inputCls} value={form.openDate} onChange={(e) => updateField('openDate', e.target.value)} />
+              <Label className="text-xs">开店日期</Label>
+              <Input type="date" className="mt-1 rounded-lg" value={form.openDate} onChange={(e) => updateField('openDate', e.target.value)} />
             </div>
             <div>
-              <label className={labelCls}>关闭日期</label>
-              <input type="date" className={inputCls} value={form.closeDate} onChange={(e) => updateField('closeDate', e.target.value)} />
+              <Label className="text-xs">关闭日期</Label>
+              <Input type="date" className="mt-1 rounded-lg" value={form.closeDate} onChange={(e) => updateField('closeDate', e.target.value)} />
             </div>
             <div>
-              <label className={labelCls}>面积(㎡)</label>
-              <input type="number" step="any" className={inputCls} value={form.area} onChange={(e) => updateField('area', e.target.value)} />
+              <Label className="text-xs">面积(㎡)</Label>
+              <Input type="number" step="any" className="mt-1 rounded-lg" value={form.area} onChange={(e) => updateField('area', e.target.value)} />
             </div>
             <div>
-              <label className={labelCls}>员工数量</label>
-              <input type="number" className={inputCls} value={form.employeeCount} onChange={(e) => updateField('employeeCount', e.target.value)} />
+              <Label className="text-xs">员工数量</Label>
+              <Input type="number" className="mt-1 rounded-lg" value={form.employeeCount} onChange={(e) => updateField('employeeCount', e.target.value)} />
             </div>
           </div>
         </div>
 
         {/* 管理信息 */}
-        <div className="mb-6">
-          <h4 className="mb-3 text-sm font-semibold text-[#1a1a2e]">管理信息</h4>
-          <div className="grid grid-cols-2 gap-4">
+        <div className="rounded-xl bg-muted/20 p-4">
+          <SectionHeader icon={Building2} title="管理信息" />
+          <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className={labelCls}>店长姓名</label>
-              <input className={inputCls} value={form.managerName} onChange={(e) => updateField('managerName', e.target.value)} />
+              <Label className="text-xs">店长姓名</Label>
+              <Input className="mt-1 rounded-lg" value={form.managerName} onChange={(e) => updateField('managerName', e.target.value)} />
             </div>
             <div>
-              <label className={labelCls}>租金</label>
-              <input type="number" step="any" className={inputCls} value={form.rentCost} onChange={(e) => updateField('rentCost', e.target.value)} />
+              <Label className="text-xs">租金</Label>
+              <Input type="number" step="any" className="mt-1 rounded-lg" value={form.rentCost} onChange={(e) => updateField('rentCost', e.target.value)} />
             </div>
-            <div className="col-span-2">
-              <label className={labelCls}>备注</label>
-              <textarea className={`${inputCls} min-h-[80px] resize-y`} value={form.remark} onChange={(e) => updateField('remark', e.target.value)} />
+            <div>
+              <Label className="text-xs">备注</Label>
+              <Textarea className="mt-1 min-h-9.5 resize-y rounded-lg" value={form.remark} onChange={(e) => updateField('remark', e.target.value)} />
             </div>
           </div>
         </div>
 
-        {/* 操作按钮 */}
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={closeForm}
-            className="rounded-lg border border-[#e0ddd8] bg-white px-4 py-2 text-sm text-[#555] hover:bg-[#f5f5f5]"
-          >
+        <DialogFooter className="pt-2">
+          <Button variant="outline" onClick={closeForm} className="rounded-xl">
             取消
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSubmit}
             disabled={submitting}
-            className="flex items-center gap-2 rounded-lg bg-[#4f46e5] px-4 py-2 text-sm font-medium text-white hover:bg-[#4338ca] disabled:opacity-50"
+            className="gradient-primary text-white shadow-lg shadow-primary/20 rounded-xl"
           >
-            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+            {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             {isEdit ? '保存' : '创建'}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

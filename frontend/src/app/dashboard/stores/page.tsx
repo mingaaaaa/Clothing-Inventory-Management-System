@@ -8,6 +8,8 @@ import { StoreFormDialog } from '@/components/stores/store-form-dialog';
 import { StoreDetailDrawer } from '@/components/stores/store-detail-drawer';
 import { StoreDeleteDialog } from '@/components/stores/store-delete-dialog';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function StoresPage() {
   const {
@@ -26,17 +28,20 @@ export default function StoresPage() {
   }, [fetchStores]);
 
   return (
-    <div>
+    <div className="max-w-7xl mx-auto animate-fade-in">
       {/* 页面标题 */}
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-[#1a1a2e]">门店管理</h2>
-        <button
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">门店管理</h2>
+          <p className="mt-1 text-sm text-muted-foreground">管理所有门店信息</p>
+        </div>
+        <Button
           onClick={openCreateForm}
-          className="flex items-center gap-2 rounded-lg bg-[#4f46e5] px-4 py-2 text-sm font-medium text-white hover:bg-[#4338ca]"
+          className="gradient-primary text-white shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 mr-2" />
           新增门店
-        </button>
+        </Button>
       </div>
 
       {/* 搜索筛选 */}
@@ -47,16 +52,20 @@ export default function StoresPage() {
 
       {/* 分页 */}
       {total > 0 && (
-        <div className="mt-4 flex items-center justify-between">
-          <span className="text-sm text-[#999]">共 {total} 条记录</span>
+        <div className="mt-4 flex items-center justify-between px-2">
+          <span className="text-sm text-muted-foreground">
+            共 <span className="font-medium text-foreground">{total}</span> 条记录
+          </span>
           <div className="flex items-center gap-1">
-            <button
+            <Button
+              variant="outline"
+              size="icon-sm"
               onClick={() => setPage(page - 1)}
               disabled={page <= 1}
-              className="rounded-lg border border-[#e0ddd8] bg-white p-2 text-[#666] hover:bg-[#f5f5f5] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg"
             >
               <ChevronLeft className="h-4 w-4" />
-            </button>
+            </Button>
             {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
               let pageNum: number;
               if (totalPages <= 5) {
@@ -69,36 +78,37 @@ export default function StoresPage() {
                 pageNum = page - 2 + i;
               }
               return (
-                <button
+                <Button
                   key={pageNum}
+                  variant={page === pageNum ? 'default' : 'outline'}
+                  size="icon-sm"
                   onClick={() => setPage(pageNum)}
-                  className={`min-w-[36px] rounded-lg border px-3 py-2 text-sm ${
-                    page === pageNum
-                      ? 'border-[#6366f1] bg-[#6366f1] text-white'
-                      : 'border-[#e0ddd8] bg-white text-[#666] hover:bg-[#f5f5f5]'
-                  }`}
+                  className={`min-w-9 rounded-lg ${page === pageNum ? 'gradient-primary shadow-sm shadow-primary/20' : ''}`}
                 >
                   {pageNum}
-                </button>
+                </Button>
               );
             })}
-            <button
+            <Button
+              variant="outline"
+              size="icon-sm"
               onClick={() => setPage(page + 1)}
               disabled={page >= totalPages}
-              className="rounded-lg border border-[#e0ddd8] bg-white p-2 text-[#666] hover:bg-[#f5f5f5] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg"
             >
               <ChevronRight className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
-          <select
-            value={pageSize}
-            onChange={(e) => setPageSize(Number(e.target.value))}
-            className="rounded-lg border border-[#e0ddd8] bg-white px-3 py-2 text-sm outline-none"
-          >
-            <option value="10">10条/页</option>
-            <option value="20">20条/页</option>
-            <option value="50">50条/页</option>
-          </select>
+          <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+            <SelectTrigger className="w-28 h-8 rounded-lg text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10条/页</SelectItem>
+              <SelectItem value="20">20条/页</SelectItem>
+              <SelectItem value="50">50条/页</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       )}
 

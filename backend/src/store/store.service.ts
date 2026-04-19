@@ -87,14 +87,19 @@ export class StoreService {
     return store;
   }
 
-  async create(dto: CreateStoreDto) {
-    const existing = await this.prisma.store.findUnique({
-      where: { code: dto.code },
+  private async generateNextCode(): Promise<string> {
+    return this.prisma.$transaction(async (tx) => {
+      const result = await tx.$queryRaw<Array<{ max_num: bigint }>>`
+        SELECT MAX(CAST(REPLACE(code, 'STR-', '') AS INTEGER)) as max_num
+        FROM stores WHERE code LIKE 'STR-%'
+      `;
+      const nextNum = result[0]?.max_num ? Number(result[0].max_num) + 1 : 1;
+      return `STR-${String(nextNum).padStart(3, '0')}`;
     });
+  }
 
-    if (existing) {
-      throw new ConflictException('门店编码已存在');
-    }
+  async create(dto: CreateStoreDto) {
+    const code = await this.generateNextCode();
 
     if (dto.managerId) {
       const user = await this.prisma.user.findUnique({
@@ -108,7 +113,7 @@ export class StoreService {
     return this.prisma.store.create({
       data: {
         name: dto.name,
-        code: dto.code,
+        code,
         type: dto.type,
         status: dto.status,
         country: dto.country,
@@ -135,15 +140,6 @@ export class StoreService {
 
   async update(id: number, dto: UpdateStoreDto) {
     await this.findOne(id);
-
-    if (dto.code) {
-      const existing = await this.prisma.store.findFirst({
-        where: { code: dto.code, NOT: { id } },
-      });
-      if (existing) {
-        throw new ConflictException('门店编码已存在');
-      }
-    }
 
     if (dto.managerId) {
       const user = await this.prisma.user.findUnique({

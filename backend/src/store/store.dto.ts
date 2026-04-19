@@ -57,9 +57,9 @@ export class CreateStoreDto {
   @IsNotEmpty()
   name!: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  code!: string;
+  code?: string;
 
   @IsEnum(StoreType)
   type!: StoreType;
@@ -146,11 +146,6 @@ export class UpdateStoreDto {
   @IsString()
   @IsNotEmpty()
   name?: string;
-
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  code?: string;
 
   @IsOptional()
   @IsEnum(StoreType)

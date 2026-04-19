@@ -40,45 +40,46 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 234 33% 14%;
-    --card: 40 20% 98%;
-    --card-foreground: 234 33% 14%;
+    --background: 220 20% 97%;
+    --foreground: 224 24% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 24% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 234 33% 14%;
-    --primary: 239 84% 67%;
+    --popover-foreground: 224 24% 12%;
+    --primary: 245 75% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 40 10% 96%;
-    --secondary-foreground: 234 33% 14%;
-    --muted: 40 10% 96%;
-    --muted-foreground: 0 0% 55%;
-    --accent: 40 10% 96%;
-    --accent-foreground: 234 33% 14%;
-    --destructive: 0 84% 60%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 224 24% 12%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 46%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 224 24% 12%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 40 10% 89%;
-    --input: 40 10% 89%;
-    --ring: 239 84% 67%;
-    --radius: 0.625rem;
-    --chart-1: 239 84% 67%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 245 75% 60%;
+    --radius: 0.75rem;
+    --chart-1: 245 75% 60%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 234 33% 14%;
-    --sidebar-primary: 239 84% 67%;
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 220 20% 88%;
+    --sidebar-primary: 245 75% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 239 84% 67%;
+    --sidebar-accent: 245 75% 55%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 40 10% 93%;
-    --sidebar-ring: 239 84% 67%;
+    --sidebar-border: 220 30% 18%;
+    --sidebar-ring: 245 75% 60%;
   }
 }
 
@@ -91,4 +92,68 @@
     color: var(--color-foreground);
     font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   }
+}
+
+/* Premium glass card utility */
+@layer utilities {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+  .glass-card-dark {
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .premium-shadow {
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+  .premium-shadow-lg {
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.04),
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      0 0 0 1px rgba(0, 0, 0, 0.02);
+  }
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(245 75% 60%) 0%, hsl(260 70% 58%) 100%);
+  }
+  .gradient-primary-hover {
+    background: linear-gradient(135deg, hsl(245 75% 55%) 0%, hsl(260 70% 53%) 100%);
+  }
+  .gradient-accent-bar {
+    background: linear-gradient(90deg, hsl(245 75% 60%), hsl(260 70% 58%), hsl(280 65% 60%));
+  }
+  .text-gradient-primary {
+    background: linear-gradient(135deg, hsl(245 75% 60%), hsl(260 70% 58%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .animate-fade-up {
+    animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-slide-in-right {
+    animation: slideInRight 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
 }

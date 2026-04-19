@@ -3,7 +3,9 @@
 import { useStoreStore } from '@/stores/store-store';
 import { StoreTypeBadge } from './store-type-badge';
 import { StoreStatusBadge } from './store-status-badge';
-import { Eye, Pencil, Trash2, ArrowUpDown, Loader2 } from 'lucide-react';
+import { Eye, Pencil, Trash2, ArrowUpDown, Loader2, PackageOpen } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 
 export function StoreTable() {
   const { stores, loading, sortBy, sortOrder, setSort, openDetail, openEditForm, openDelete } = useStoreStore();
@@ -16,95 +18,99 @@ export function StoreTable() {
     }
   };
 
-  const SortHeader = ({ field, label }: { field: string; label: string }) => (
-    <th
-      className="cursor-pointer select-none whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-[#999] hover:text-[#333]"
-      onClick={() => handleSort(field)}
-    >
-      <div className="flex items-center gap-1">
-        {label}
-        <ArrowUpDown className={`h-3 w-3 ${sortBy === field ? 'text-[#6366f1]' : ''}`} />
-      </div>
-    </th>
-  );
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-[#6366f1]" />
-        <span className="ml-2 text-sm text-[#999]">加载中...</span>
+      <div className="flex flex-col items-center justify-center py-16 rounded-2xl bg-white premium-shadow">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <span className="mt-3 text-sm text-muted-foreground">加载中...</span>
       </div>
     );
   }
 
   if (stores.length === 0) {
     return (
-      <div className="py-20 text-center text-sm text-[#999]">暂无门店数据</div>
+      <div className="flex flex-col items-center justify-center py-16 rounded-2xl bg-white premium-shadow">
+        <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+          <PackageOpen className="h-8 w-8 text-muted-foreground/40" />
+        </div>
+        <p className="text-sm font-medium text-muted-foreground">暂无门店数据</p>
+        <p className="text-xs text-muted-foreground/60 mt-1">点击上方按钮新增门店</p>
+      </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-[#eaeaea] bg-white">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-[#f0f0f0] bg-[#fafaf9]">
-            <SortHeader field="code" label="编码" />
-            <SortHeader field="name" label="名称" />
-            <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-[#999]">类型</th>
-            <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-[#999]">状态</th>
-            <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-[#999]">城市</th>
-            <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-[#999]">地址</th>
-            <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-[#999]">联系人</th>
-            <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-[#999]">联系电话</th>
-            <SortHeader field="area" label="面积(m²)" />
-            <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-[#999]">创建时间</th>
-            <th className="whitespace-nowrap px-4 py-3 text-center text-xs font-medium text-[#999]">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {stores.map((store) => (
-            <tr key={store.id} className="border-b border-[#f0f0f0] hover:bg-[#fafaf9]">
-              <td className="px-4 py-3 text-sm font-medium text-[#1a1a2e]">{store.code}</td>
-              <td className="px-4 py-3 text-sm text-[#333]">{store.name}</td>
-              <td className="px-4 py-3"><StoreTypeBadge type={store.type} /></td>
-              <td className="px-4 py-3"><StoreStatusBadge status={store.status} /></td>
-              <td className="px-4 py-3 text-sm text-[#666]">{store.city || '-'}</td>
-              <td className="max-w-[200px] truncate px-4 py-3 text-sm text-[#666]">{store.address || '-'}</td>
-              <td className="px-4 py-3 text-sm text-[#666]">{store.contactName || '-'}</td>
-              <td className="px-4 py-3 text-sm text-[#666]">{store.contactPhone || '-'}</td>
-              <td className="px-4 py-3 text-sm text-[#666]">{store.area ?? '-'}</td>
-              <td className="whitespace-nowrap px-4 py-3 text-sm text-[#666]">
+    <div className="overflow-hidden rounded-2xl bg-white premium-shadow">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/30 hover:bg-muted/30 border-border/50">
+            <TableHead
+              className="cursor-pointer select-none font-semibold text-xs uppercase tracking-wider text-muted-foreground"
+              onClick={() => handleSort('code')}
+            >
+              <div className="flex items-center gap-1">
+                编码
+                <ArrowUpDown className={`h-3 w-3 transition-colors ${sortBy === 'code' ? 'text-primary' : 'text-muted-foreground/40'}`} />
+              </div>
+            </TableHead>
+            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">
+              名称
+            </TableHead>
+            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">类型</TableHead>
+            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">状态</TableHead>
+            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">城市</TableHead>
+            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">地址</TableHead>
+            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">联系人</TableHead>
+            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">联系电话</TableHead>
+            <TableHead
+              className="cursor-pointer select-none font-semibold text-xs uppercase tracking-wider text-muted-foreground"
+              onClick={() => handleSort('area')}
+            >
+              <div className="flex items-center gap-1">
+                面积(m²)
+                <ArrowUpDown className={`h-3 w-3 transition-colors ${sortBy === 'area' ? 'text-primary' : 'text-muted-foreground/40'}`} />
+              </div>
+            </TableHead>
+            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">创建时间</TableHead>
+            <TableHead className="text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground">操作</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {stores.map((store, index) => (
+            <TableRow
+              key={store.id}
+              className="border-border/30 transition-colors duration-150 hover:bg-primary/2"
+              style={{ animationDelay: `${index * 30}ms` }}
+            >
+              <TableCell className="font-semibold text-xs">{store.code}</TableCell>
+              <TableCell className="font-medium">{store.name}</TableCell>
+              <TableCell><StoreTypeBadge type={store.type} /></TableCell>
+              <TableCell><StoreStatusBadge status={store.status} /></TableCell>
+              <TableCell>{store.city || '-'}</TableCell>
+              <TableCell className="max-w-40 truncate text-muted-foreground">{store.address || '-'}</TableCell>
+              <TableCell>{store.contactName || '-'}</TableCell>
+              <TableCell className="text-muted-foreground">{store.contactPhone || '-'}</TableCell>
+              <TableCell>{store.area ?? '-'}</TableCell>
+              <TableCell className="whitespace-nowrap text-muted-foreground text-xs">
                 {new Date(store.createdAt).toLocaleDateString()}
-              </td>
-              <td className="whitespace-nowrap px-4 py-3">
-                <div className="flex items-center justify-center gap-1">
-                  <button
-                    onClick={() => openDetail(store)}
-                    className="rounded-lg p-1.5 text-[#999] hover:bg-[#f0f0f0] hover:text-[#6366f1]"
-                    title="查看详情"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => openEditForm(store)}
-                    className="rounded-lg p-1.5 text-[#999] hover:bg-[#f0f0f0] hover:text-[#6366f1]"
-                    title="编辑"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => openDelete(store)}
-                    className="rounded-lg p-1.5 text-[#999] hover:bg-[#f0f0f0] hover:text-red-500"
-                    title="删除"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center justify-center gap-0.5">
+                  <Button variant="ghost" size="icon-sm" onClick={() => openDetail(store)} title="查看详情" className="rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5">
+                    <Eye className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="icon-sm" onClick={() => openEditForm(store)} title="编辑" className="rounded-lg text-muted-foreground hover:text-amber-600 hover:bg-amber-50">
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="icon-sm" onClick={() => openDelete(store)} title="删除" className="rounded-lg text-muted-foreground hover:text-destructive hover:bg-red-50">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
